@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>愛蓮說 · 互動學堂 (修正版)</title>
+    <style>
+        /* ===== 全域 ===== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang HK', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(145deg, #f5efe8 0%, #e8f0ea 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app {
+            max-width: 1100px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(4px);
+            border-radius: 48px;
+            padding: 28px 32px 36px;
+            box-shadow: 0 20px 60px rgba(100, 80, 70, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.2s;
+        }
+
+        /* ===== 標題 ===== */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            border-bottom: 2px dashed #dacbc1;
+            padding-bottom: 16px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .header-left .icon {
+            font-size: 36px;
+        }
+
+        .header-left h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #3d2e26;
+            letter-spacing: 2px;
+        }
+
+        .header-left h1 small {
+            font-size: 16px;
+            font-weight: 400;
+            color: #7a6a5e;
+            letter-spacing: 0;
+        }
+
+        .score-box {
+            background: #dacbc1;
+            padding: 8px 22px;
+            border-radius: 60px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d241e;
+            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .score-box span {
+            background: #fff;
+            padding: 0 14px;
+            border-radius: 40px;
+            font-size: 22px;
+            min-width: 40px;
+            text-align: center;
+            color: #4a352a;
+        }
+
+        /* ===== 頁籤 ===== */
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            flex: 1 1 auto;
+            min-width: 100px;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            background: #ede7e0;
+            color: #5b4b40;
+            cursor: pointer;
+            transition: 0.25s;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            background: #e2d7cc;
+            transform: translateY(-1px);
+        }
+
+        .tab-btn.active {
+            background: #5a8f6f;
+            color: #fff;
+            box-shadow: 0 6px 18px rgba(90, 143, 111, 0.35);
+        }
+
+        .tab-btn .badge {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 40px;
+            padding: 0 12px;
+            font-size: 14px;
+        }
+
+        .tab-btn.active .badge {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* ===== 遊戲面板 ===== */
+        .game-panel {
+            display: none;
+            animation: fadeUp 0.35s ease;
+        }
+
+        .game-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .game-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #3d2e26;
+            margin-bottom: 6px;
+        }
+
+        .game-desc {
+            color: #6f5f53;
+            margin-bottom: 18px;
+            font-size: 15px;
+            background: #f4efe9;
+            padding: 10px 18px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        /* ==========================================================
+               遊戲1：配對（修正版）
+               ========================================================== */
+        .match-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px 20px;
+            justify-content: center;
+            margin: 12px 0 20px;
+        }
+
+        .match-col {
+            flex: 1 1 200px;
+            min-width: 160px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .match-col h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #6f5f53;
+            text-align: center;
+            letter-spacing: 1px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #dacbc1;
+        }
+
+        .match-card {
+            padding: 14px 16px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            border: 2px solid #ede7e0;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+            color: #3d2e26;
+            cursor: pointer;
+            transition: 0.2s;
+            user-select: none;
+            min-height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-break: break-word;
+        }
+
+        .match-card:hover:not(.matched):not(.disabled) {
+            transform: translateY(-2px);
+            border-color: #b8a99c;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        /* 選取狀態 */
+        .match-card.match-selected {
+            border-color: #5a8f6f;
+            background: #eaf3ed;
+            box-shadow: 0 0 0 4px rgba(90, 143, 111, 0.15);
+            transform: scale(1.02);
+        }
+
+        .match-card.matched {
+            border-color: #5a8f6f;
+            background: #e3f0e7;
+            cursor: default;
+            opacity: 0.85;
+            transform: scale(0.98);
+        }
+
+        .match-card.matched::after {
+            content: ' ✅';
+            font-size: 18px;
+        }
+
+        .match-card.wrong {
+            animation: shake 0.4s;
+            border-color: #d46a6a;
+            background: #fdeaea;
+        }
+
+        .match-card.disabled {
+            cursor: default;
+            opacity: 0.6;
+        }
+
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(-8px);
+            }
+            40% {
+                transform: translateX(8px);
+            }
+            60% {
+                transform: translateX(-4px);
+            }
+            80% {
+                transform: translateX(4px);
+            }
+        }
+
+        .match-status {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+            color: #5a8f6f;
+            min-height: 36px;
+            margin-top: 6px;
+        }
+
+        .match-status.error {
+            color: #d46a6a;
+        }
+
+        /* ==========================================================
+               遊戲2：花語
+               ========================================================== */
+        .flower-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px 20px;
+            justify-content: center;
+            margin: 16px 0 24px;
+        }
+
+        .flower-item {
+            flex: 1 1 160px;
+            min-width: 140px;
+            background: #fff;
+            border-radius: 32px;
+            padding: 20px 12px 16px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+            border: 2px solid #ede7e0;
+            text-align: center;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .flower-item:hover {
+            transform: translateY(-3px);
+            border-color: #b8a99c;
+        }
+
+        .flower-item.f-selected {
+            border-color: #5a8f6f;
+            background: #eaf3ed;
+            box-shadow: 0 0 0 4px rgba(90, 143, 111, 0.12);
+        }
+
+        .flower-item .emoji {
+            font-size: 44px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .flower-item .fname {
+            font-size: 20px;
+            font-weight: 700;
+            color: #3d2e26;
+        }
+
+        .flower-item .fdesc {
+            font-size: 14px;
+            color: #6f5f53;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        .flower-item.matched {
+            border-color: #5a8f6f;
+            background: #e3f0e7;
+            cursor: default;
+            opacity: 0.8;
+        }
+
+        .flower-item.matched::after {
+            content: ' ✅';
+            font-size: 20px;
+        }
+
+        .flower-item.wrong {
+            animation: shake 0.4s;
+            border-color: #d46a6a;
+            background: #fdeaea;
+        }
+
+        .symbol-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+            margin: 6px 0 18px;
+        }
+
+        .symbol-chip {
+            padding: 12px 28px;
+            background: #fff;
+            border-radius: 60px;
+            border: 2px solid #dacbc1;
+            font-size: 17px;
+            font-weight: 500;
+            color: #3d2e26;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            user-select: none;
+        }
+
+        .symbol-chip:hover {
+            transform: translateY(-2px);
+            border-color: #b8a99c;
+        }
+
+        .symbol-chip.s-selected {
+            border-color: #5a8f6f;
+            background: #eaf3ed;
+            box-shadow: 0 0 0 4px rgba(90, 143, 111, 0.12);
+        }
+
+        .symbol-chip.matched {
+            border-color: #5a8f6f;
+            background: #e3f0e7;
+            cursor: default;
+            opacity: 0.7;
+        }
+
+        .symbol-chip.matched::after {
+            content: ' ✅';
+        }
+
+        .symbol-chip.wrong {
+            animation: shake 0.4s;
+            border-color: #d46a6a;
+            background: #fdeaea;
+        }
+
+        .flower-status {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+            color: #5a8f6f;
+            min-height: 36px;
+        }
+
+        /* ==========================================================
+               遊戲3：測驗
+               ========================================================== */
+        .quiz-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .quiz-progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: #ede7e0;
+            padding: 8px 20px;
+            border-radius: 60px;
+        }
+
+        .quiz-progress span {
+            font-weight: 600;
+            color: #3d2e26;
+        }
+
+        .quiz-progress .bar {
+            flex: 1;
+            height: 6px;
+            background: #dacbc1;
+            border-radius: 10px;
+            margin: 0 16px;
+            overflow: hidden;
+        }
+
+        .quiz-progress .bar .fill {
+            height: 100%;
+            width: 0%;
+            background: #5a8f6f;
+            border-radius: 10px;
+            transition: 0.4s;
+        }
+
+        .question-box {
+            background: #fff;
+            border-radius: 32px;
+            padding: 28px 32px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+            border: 1px solid #ede7e0;
+        }
+
+        .question-box .q-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #3d2e26;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .options .opt {
+            padding: 14px 20px;
+            background: #f8f4ef;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            font-size: 16px;
+            font-weight: 500;
+            color: #3d2e26;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .options .opt:hover:not(.disabled) {
+            background: #efe8e0;
+            border-color: #dacbc1;
+        }
+
+        .options .opt.correct {
+            border-color: #5a8f6f;
+            background: #e3f0e7;
+        }
+
+        .options .opt.correct::after {
+            content: ' ✅';
+        }
+
+        .options .opt.wrong {
+            border-color: #d46a6a;
+            background: #fdeaea;
+        }
+
+        .options .opt.wrong::after {
+            content: ' ❌';
+        }
+
+        .options .opt.disabled {
+            cursor: default;
+            opacity: 0.7;
+        }
+
+        .quiz-feedback {
+            margin-top: 18px;
+            padding: 14px 20px;
+            border-radius: 20px;
+            font-size: 15px;
+            line-height: 1.6;
+            display: none;
+        }
+
+        .quiz-feedback.show {
+            display: block;
+        }
+
+        .quiz-feedback.good {
+            background: #e3f0e7;
+            color: #2d5a3e;
+            border-left: 6px solid #5a8f6f;
+        }
+
+        .quiz-feedback.bad {
+            background: #fdeaea;
+            color: #7a3e3e;
+            border-left: 6px solid #d46a6a;
+        }
+
+        .quiz-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 24px;
+            gap: 12px;
+        }
+
+        .quiz-nav button {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 60px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #ede7e0;
+            color: #5b4b40;
+        }
+
+        .quiz-nav button:hover:not(:disabled) {
+            background: #e2d7cc;
+        }
+
+        .quiz-nav button.primary {
+            background: #5a8f6f;
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(90, 143, 111, 0.25);
+        }
+
+        .quiz-nav button.primary:hover:not(:disabled) {
+            background: #4a7a5e;
+            transform: translateY(-2px);
+        }
+
+        .quiz-nav button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ===== 完成狀態 ===== */
+        .complete-msg {
+            text-align: center;
+            padding: 30px 20px;
+            background: #eaf3ed;
+            border-radius: 40px;
+            margin-top: 12px;
+        }
+
+        .complete-msg .big {
+            font-size: 52px;
+        }
+        .complete-msg h2 {
+            font-size: 26px;
+            color: #2d5a3e;
+            margin: 8px 0 4px;
+        }
+        .complete-msg p {
+            color: #4a7a5e;
+            font-size: 17px;
+        }
+
+        /* ===== 響應式 ===== */
+        @media (max-width: 700px) {
+            .app {
+                padding: 18px 16px 24px;
+                border-radius: 32px;
+            }
+            .header-left h1 {
+                font-size: 20px;
+            }
+            .header-left h1 small {
+                font-size: 14px;
+            }
+            .score-box {
+                font-size: 15px;
+                padding: 6px 14px;
+            }
+            .tab-btn {
+                font-size: 14px;
+                padding: 10px 12px;
+                min-width: 70px;
+            }
+            .match-col {
+                flex: 1 1 140px;
+                min-width: 120px;
+            }
+            .match-card {
+                font-size: 14px;
+                padding: 12px 10px;
+                min-height: 52px;
+            }
+            .flower-item {
+                flex: 1 1 120px;
+                min-width: 100px;
+                padding: 14px 8px;
+            }
+            .flower-item .emoji {
+                font-size: 34px;
+            }
+            .flower-item .fname {
+                font-size: 17px;
+            }
+            .symbol-chip {
+                font-size: 14px;
+                padding: 10px 18px;
+            }
+            .question-box {
+                padding: 20px 16px;
+            }
+            .question-box .q-text {
+                font-size: 17px;
+            }
+            .options .opt {
+                font-size: 14px;
+                padding: 12px 16px;
+            }
+            .quiz-nav button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 450px) {
+            .header-left .icon {
+                font-size: 26px;
+            }
+            .header-left h1 {
+                font-size: 17px;
+            }
+            .tab-btn {
+                font-size: 12px;
+                padding: 8px 8px;
+                min-width: 56px;
+            }
+            .match-area {
+                gap: 20px 10px;
+            }
+            .match-col {
+                flex: 1 1 100%;
+                min-width: 0;
+            }
+            .match-card {
+                font-size: 13px;
+                padding: 10px 8px;
+                min-height: 44px;
+            }
+        }
+
+        .text-center {
+            text-align: center;
+        }
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .mt-16 {
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app" id="app">
+        <!-- 標題 -->
+        <header class="header">
+            <div class="header-left">
+                <span class="icon">🪷</span>
+                <h1>愛蓮說 <small>· 互動學堂</small></h1>
+            </div>
+            <div class="score-box">
+                🏆 總分 <span id="totalScore">0</span>
+            </div>
+        </header>
+
+        <!-- 頁籤 -->
+        <nav class="tabs" id="tabNav">
+            <button class="tab-btn active" data-tab="game1">
+                🧩 配對
+                <span class="badge" id="badge1">0/4</span>
+            </button>
+            <button class="tab-btn" data-tab="game2">
+                🌸 花語
+                <span class="badge" id="badge2">0/3</span>
+            </button>
+            <button class="tab-btn" data-tab="game3">
+                📝 挑戰
+                <span class="badge" id="badge3">0/5</span>
+            </button>
+        </nav>
+
+        <!-- ============================================= -->
+        <!-- 遊戲1：配對（修正版） -->
+        <!-- ============================================= -->
+        <section class="game-panel active" id="panel1">
+            <div class="game-title">🧩 蓮花品格配對</div>
+            <div class="game-desc">
+                先點擊左邊嘅「蓮花特徵」，再點擊右邊對應嘅「君子品格」。配對成功會自動鎖定。
+            </div>
+
+            <div class="match-area" id="matchArea">
+                <div class="match-col">
+                    <h3>🌿 蓮花特徵</h3>
+                    <div id="leftCol"></div>
+                </div>
+                <div class="match-col">
+                    <h3>🎯 君子品格</h3>
+                    <div id="rightCol"></div>
+                </div>
+            </div>
+
+            <div class="match-status" id="matchStatus">揀一個特徵，再揀一個品格</div>
+            <div class="text-center mt-8">
+                <button class="tab-btn" style="background:#dacbc1;padding:8px 28px;font-size:14px;" id="resetMatchBtn">🔄 重新配對</button>
+            </div>
+        </section>
+
+        <!-- ============================================= -->
+        <!-- 遊戲2：花語 -->
+        <!-- ============================================= -->
+        <section class="game-panel" id="panel2">
+            <div class="game-title">🌸 花語知多少</div>
+            <div class="game-desc">
+                先點擊一朵花，再點擊下方對應嘅象徵意義。
+            </div>
+
+            <div class="flower-grid" id="flowerGrid"></div>
+
+            <div class="symbol-pool" id="symbolPool"></div>
+
+            <div class="flower-status" id="flowerStatus">揀一朵花，再揀一個象徵</div>
+            <div class="text-center mt-8">
+                <button class="tab-btn" style="background:#dacbc1;padding:8px 28px;font-size:14px;" id="resetFlowerBtn">🔄 重新配對</button>
+            </div>
+        </section>
+
+        <!-- ============================================= -->
+        <!-- 遊戲3：測驗 -->
+        <!-- ============================================= -->
+        <section class="game-panel" id="panel3">
+            <div class="game-title">📝 課文小挑戰</div>
+            <div class="game-desc">
+                回答以下問題，測試你對《愛蓮說》嘅理解！
+            </div>
+
+            <div class="quiz-container">
+                <div class="quiz-progress">
+                    <span id="qNum">1 / 5</span>
+                    <div class="bar"><div class="fill" id="qBar" style="width:0%;"></div></div>
+                    <span id="qScore">0 分</span>
+                </div>
+
+                <div class="question-box" id="questionBox">
+                    <div class="q-text" id="qText">載入題目…</div>
+                    <div class="options" id="optionsContainer"></div>
+                    <div class="quiz-feedback" id="quizFeedback"></div>
+                </div>
+
+                <div class="quiz-nav">
+                    <button id="prevBtn" disabled>⬅ 上一題</button>
+                    <button class="primary" id="nextBtn">下一題 ➡</button>
+                </div>
+
+                <div id="quizComplete" style="display:none;" class="complete-msg">
+                    <div class="big">🎉</div>
+                    <h2>挑戰完成！</h2>
+                    <p id="finalMsg">你獲得咗 0 分！</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // ================================================================
+        //  資料
+        // ================================================================
+
+        // 遊戲1：配對
+        const PAIRS = [{
+            id: 0,
+            feature: '出淤泥而不染',
+            virtue: '高潔清廉，不同流合污'
+        }, {
+            id: 1,
+            feature: '濯清漣而不妖',
+            virtue: '質樸自然，不矯揉造作'
+        }, {
+            id: 2,
+            feature: '中通外直',
+            virtue: '內心通達，行為正直'
+        }, {
+            id: 3,
+            feature: '香遠益清',
+            virtue: '品德高尚，聲名遠播'
+        }];
+
+        // 遊戲2：花語
+        const FLOWERS = [{
+            id: 0,
+            name: '蓮花',
+            emoji: '🪷',
+            symbol: '君子',
+            desc: '出淤泥而不染，在濁世中保持高潔'
+        }, {
+            id: 1,
+            name: '菊花',
+            emoji: '🌼',
+            symbol: '隱逸者',
+            desc: '逃避世俗，隱居不仕'
+        }, {
+            id: 2,
+            name: '牡丹',
+            emoji: '🌺',
+            symbol: '富貴者',
+            desc: '追逐名利，隨波逐流'
+        }];
+
+        // 遊戲3：測驗
+        const QUIZ = [{
+            q: '《愛蓮說》嘅作者係邊個？',
+            opts: ['周敦頤', '朱熹', '程頤', '張載'],
+            ans: 0,
+            explain: '周敦頤，北宋官員、學者，宋明理學奠基人之一，世稱「濂溪先生」。'
+        }, {
+            q: '「出淤泥而不染」象徵君子咩品格？',
+            opts: ['高潔清廉，不同流合污', '質樸自然，不矯揉造作', '內心通達，行為正直', '品德高尚，聲名遠播'],
+            ans: 0,
+            explain: '「出淤泥而不染」指蓮花從污泥中長出卻不被污染，象徵君子保持高潔，不與世俗同流合污。'
+        }, {
+            q: '菊花喺文中代表邊種處世態度？',
+            opts: ['追逐名利，隨波逐流', '逃避世俗，隱居不仕', '積極入世，建功立業', '超然物外，逍遙自在'],
+            ans: 1,
+            explain: '菊花代表「隱逸者」，對世俗採取逃避、隔絕嘅態度。'
+        }, {
+            q: '牡丹喺文中代表邊種人？',
+            opts: ['君子', '隱逸者', '富貴者', '勞動者'],
+            ans: 2,
+            explain: '牡丹代表「富貴者」，對世俗採取隨波逐流、同流合污嘅態度。'
+        }, {
+            q: '作者用菊花同牡丹嚟襯托蓮花，主要目的係？',
+            opts: [
+                '顯示自己鍾意所有花',
+                '批評菊花同牡丹唔好',
+                '突出蓮花喺濁世中保持高潔嘅可貴',
+                '介紹三種花嘅種植方法'
+            ],
+            ans: 2,
+            explain: '作者以菊花（隱逸）和牡丹（富貴）作對比，襯托出蓮花「出淤泥而不染」嘅君子品格，表達自己唔隨波逐流、追求高潔嘅志向。'
+        }];
+
+        // ================================================================
+        //  狀態
+        // ================================================================
+
+        const state = {
+            // 遊戲1 (修正後)
+            leftItems: [], // { pairId, feature, matched }
+            rightItems: [], // { pairId, virtue, matched }
+            selectedLeft: null, // 左邊選中的 index (或 null)
+            selectedRight: null, // 右邊選中的 index (或 null)
+            matchDone: 0,
+
+            // 遊戲2
+            flowerItems: [],
+            symbolItems: [],
+            flowerSelected: null, // flower id
+            flowerDone: 0,
+
+            // 遊戲3
+            quizIndex: 0,
+            quizAnswers: [],
+        };
+
+        // ================================================================
+        //  工具
+        // ================================================================
+
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function updateTotalScore() {
+            const s1 = state.matchDone;
+            const s2 = state.flowerDone;
+            const s3 = state.quizAnswers.filter(a => a !== -1).length;
+            const total = s1 + s2 + s3;
+            document.getElementById('totalScore').textContent = total;
+            document.getElementById('badge1').textContent = `${s1}/${PAIRS.length}`;
+            document.getElementById('badge2').textContent = `${s2}/${FLOWERS.length}`;
+            document.getElementById('badge3').textContent = `${s3}/${QUIZ.length}`;
+        }
+
+        // ================================================================
+        //  遊戲1：配對 (完全重寫)
+        // ================================================================
+
+        function initMatch() {
+            // 建立左邊項目 (保持順序)
+            state.leftItems = PAIRS.map((p) => ({
+                pairId: p.id,
+                feature: p.feature,
+                matched: false,
+            }));
+            // 建立右邊項目 (打亂)
+            const rightRaw = PAIRS.map((p) => ({
+                pairId: p.id,
+                virtue: p.virtue,
+                matched: false,
+            }));
+            state.rightItems = shuffleArray(rightRaw);
+
+            state.selectedLeft = null;
+            state.selectedRight = null;
+            state.matchDone = 0;
+            renderMatch();
+        }
+
+        function renderMatch() {
+            const leftCol = document.getElementById('leftCol');
+            const rightCol = document.getElementById('rightCol');
+            leftCol.innerHTML = '';
+            rightCol.innerHTML = '';
+
+            // 左欄
+            state.leftItems.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'match-card';
+                if (item.matched) div.classList.add('matched');
+                if (state.selectedLeft === index && !item.matched) div.classList.add('match-selected');
+                div.textContent = item.feature;
+                div.dataset.index = index;
+                div.dataset.side = 'left';
+                div.addEventListener('click', () => handleMatchClick('left', index));
+                leftCol.appendChild(div);
+            });
+
+            // 右欄
+            state.rightItems.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'match-card';
+                if (item.matched) div.classList.add('matched');
+                if (state.selectedRight === index && !item.matched) div.classList.add('match-selected');
+                div.textContent = item.virtue;
+                div.dataset.index = index;
+                div.dataset.side = 'right';
+                div.addEventListener('click', () => handleMatchClick('right', index));
+                rightCol.appendChild(div);
+            });
+
+            // 狀態訊息
+            const status = document.getElementById('matchStatus');
+            if (state.matchDone === PAIRS.length) {
+                status.textContent = '🎉 全部配對成功！你已經掌握蓮花與君子品格嘅對應！';
+                status.className = 'match-status';
+            } else if (state.selectedLeft !== null && state.selectedRight === null) {
+                status.textContent = '已揀左邊特徵，請揀右邊品格配對';
+                status.className = 'match-status';
+            } else if (state.selectedRight !== null && state.selectedLeft === null) {
+                status.textContent = '已揀右邊品格，請揀左邊特徵配對';
+                status.className = 'match-status';
+            } else {
+                status.textContent = '揀一個特徵，再揀一個品格 (左右順序不拘)';
+                status.className = 'match-status';
+            }
+
+            updateTotalScore();
+        }
+
+        function handleMatchClick(side, index) {
+            // 如果全部完成，忽略
+            if (state.matchDone === PAIRS.length) return;
+
+            // 取得點擊的項目
+            let item;
+            if (side === 'left') {
+                item = state.leftItems[index];
+            } else {
+                item = state.rightItems[index];
+            }
+            // 如果已配對，忽略
+            if (item.matched) return;
+
+            // --- 邏輯：配對或選取 ---
+            if (side === 'left') {
+                // 左邊被點擊
+                if (state.selectedRight !== null) {
+                    // 右邊有選取 -> 嘗試配對
+                    const leftItem = state.leftItems[index];
+                    const rightItem = state.rightItems[state.selectedRight];
+                    if (leftItem.pairId === rightItem.pairId) {
+                        // 配對成功
+                        leftItem.matched = true;
+                        rightItem.matched = true;
+                        state.matchDone++;
+                        state.selectedRight = null;
+                        // 如果有選取左邊，清除 (但左邊剛點擊，可能已選)
+                        state.selectedLeft = null;
+                        renderMatch();
+                    } else {
+                        // 配對失敗
+                        showMatchError(side, index);
+                        // 清除右邊選取，取消左邊選取
+                        state.selectedRight = null;
+                        state.selectedLeft = null;
+                        renderMatch();
+                        const status = document.getElementById('matchStatus');
+                        status.textContent = '❌ 配對唔啱，再試一次！';
+                        status.className = 'match-status error';
+                        setTimeout(() => {
+                            if (state.matchDone < PAIRS.length) {
+                                status.textContent = '揀一個特徵，再揀一個品格';
+                                status.className = 'match-status';
+                            }
+                        }, 800);
+                    }
+                } else {
+                    // 右邊沒有選取 -> 切換左邊選取狀態
+                    if (state.selectedLeft === index) {
+                        // 取消選取
+                        state.selectedLeft = null;
+                    } else {
+                        // 選取新的左邊，同時取消右邊選取 (如果有)
+                        state.selectedLeft = index;
+                        state.selectedRight = null;
+                    }
+                    renderMatch();
+                }
+            } else {
+                // 右邊被點擊
+                if (state.selectedLeft !== null) {
+                    // 左邊有選取 -> 嘗試配對
+                    const leftItem = state.leftItems[state.selectedLeft];
+                    const rightItem = state.rightItems[index];
+                    if (leftItem.pairId === rightItem.pairId) {
+                        // 配對成功
+                        leftItem.matched = true;
+                        rightItem.matched = true;
+                        state.matchDone++;
+                        state.selectedLeft = null;
+                        state.selectedRight = null;
+                        renderMatch();
+                    } else {
+                        // 配對失敗
+                        showMatchError(side, index);
+                        state.selectedLeft = null;
+                        state.selectedRight = null;
+                        renderMatch();
+                        const status = document.getElementById('matchStatus');
+                        status.textContent = '❌ 配對唔啱，再試一次！';
+                        status.className = 'match-status error';
+                        setTimeout(() => {
+                            if (state.matchDone < PAIRS.length) {
+                                status.textContent = '揀一個特徵，再揀一個品格';
+                                status.className = 'match-status';
+                            }
+                        }, 800);
+                    }
+                } else {
+                    // 左邊沒有選取 -> 切換右邊選取狀態
+                    if (state.selectedRight === index) {
+                        state.selectedRight = null;
+                    } else {
+                        state.selectedRight = index;
+                        state.selectedLeft = null;
+                    }
+                    renderMatch();
+                }
+            }
+        }
+
+        function showMatchError(side, index) {
+            const container = side === 'left' ? document.getElementById('leftCol') : document.getElementById('rightCol');
+            const cards = container.querySelectorAll('.match-card');
+            if (cards[index]) {
+                cards[index].classList.add('wrong');
+                setTimeout(() => {
+                    cards[index].classList.remove('wrong');
+                }, 500);
+            }
+        }
+
+        // ----- 重置配對 -----
+        document.getElementById('resetMatchBtn').addEventListener('click', () => {
+            if (state.matchDone === PAIRS.length || confirm('重新配對會清除進度，確定嗎？')) {
+                initMatch();
+            }
+        });
+
+        // ================================================================
+        //  遊戲2：花語 (保持原有邏輯，但確保沒有衝突)
+        // ================================================================
+
+        function initFlower() {
+            state.flowerItems = FLOWERS.map((f) => ({
+                id: f.id,
+                name: f.name,
+                emoji: f.emoji,
+                symbol: f.symbol,
+                desc: f.desc,
+                matched: false,
+                selected: false,
+            }));
+            const symbols = FLOWERS.map((f) => ({
+                id: f.id,
+                symbol: f.symbol,
+                matched: false,
+                selected: false,
+                targetId: f.id,
+            }));
+            state.symbolItems = shuffleArray(symbols);
+            state.flowerSelected = null;
+            state.flowerDone = 0;
+            renderFlower();
+        }
+
+        function renderFlower() {
+            const grid = document.getElementById('flowerGrid');
+            const pool = document.getElementById('symbolPool');
+            grid.innerHTML = '';
+            pool.innerHTML = '';
+
+            state.flowerItems.forEach(f => {
+                const div = document.createElement('div');
+                div.className = 'flower-item';
+                if (f.matched) div.classList.add('matched');
+                if (state.flowerSelected === f.id && !f.matched) div.classList.add('f-selected');
+                div.innerHTML = `
+                    <span class="emoji">${f.emoji}</span>
+                    <div class="fname">${f.name}</div>
+                    <div class="fdesc">${f.matched ? '✅ ' + f.symbol : f.desc}</div>
+                `;
+                div.dataset.id = f.id;
+                div.addEventListener('click', () => onFlowerClick(f.id));
+                grid.appendChild(div);
+            });
+
+            const available = state.symbolItems.filter(s => !s.matched);
+            if (available.length === 0) {
+                const p = document.createElement('div');
+                p.style.width = '100%';
+                p.style.textAlign = 'center';
+                p.style.color = '#5a8f6f';
+                p.style.fontWeight = '600';
+                p.textContent = '🎉 所有花語已配對完成！';
+                pool.appendChild(p);
+            } else {
+                available.forEach(s => {
+                    const chip = document.createElement('div');
+                    chip.className = 'symbol-chip';
+                    if (s.selected) chip.classList.add('s-selected');
+                    chip.textContent = s.symbol;
+                    chip.dataset.id = s.id;
+                    chip.addEventListener('click', () => onSymbolClick(s.id));
+                    pool.appendChild(chip);
+                });
+            }
+
+            const status = document.getElementById('flowerStatus');
+            if (state.flowerDone === FLOWERS.length) {
+                status.textContent = '🎉 全部配對成功！你已掌握三種花嘅象徵意義！';
+                status.className = 'flower-status';
+            } else if (state.flowerSelected !== null) {
+                const f = state.flowerItems.find(i => i.id === state.flowerSelected);
+                status.textContent = `已揀「${f.name}」，請揀一個對應嘅象徵意義`;
+                status.className = 'flower-status';
+            } else {
+                status.textContent = '揀一朵花，再揀一個象徵';
+                status.className = 'flower-status';
+            }
+            updateTotalScore();
+        }
+
+        function onFlowerClick(id) {
+            const f = state.flowerItems.find(i => i.id === id);
+            if (f.matched || state.flowerDone === FLOWERS.length) return;
+
+            if (state.flowerSelected === id) {
+                f.selected = false;
+                state.flowerSelected = null;
+                renderFlower();
+                return;
+            }
+
+            state.flowerItems.forEach(i => i.selected = false);
+            f.selected = true;
+            state.flowerSelected = id;
+            state.symbolItems.forEach(s => s.selected = false);
+            renderFlower();
+        }
+
+        function onSymbolClick(id) {
+            const s = state.symbolItems.find(i => i.id === id);
+            if (s.matched || state.flowerDone === FLOWERS.length) return;
+
+            if (state.flowerSelected === null) {
+                const status = document.getElementById('flowerStatus');
+                status.textContent = '⚠️ 請先揀一朵花！';
+                status.className = 'flower-status error';
+                setTimeout(() => {
+                    if (state.flowerDone < FLOWERS.length) {
+                        status.textContent = '揀一朵花，再揀一個象徵';
+                        status.className = 'flower-status';
+                    }
+                }, 1000);
+                return;
+            }
+
+            const f = state.flowerItems.find(i => i.id === state.flowerSelected);
+            if (f.matched) {
+                state.flowerSelected = null;
+                renderFlower();
+                return;
+            }
+
+            if (s.targetId === f.id) {
+                f.matched = true;
+                s.matched = true;
+                f.selected = false;
+                s.selected = false;
+                state.flowerDone++;
+                state.flowerSelected = null;
+                renderFlower();
+            } else {
+                const chipEl = document.querySelector(`.symbol-chip[data-id="${s.id}"]`);
+                const flowerEl = document.querySelector(`.flower-item[data-id="${f.id}"]`);
+                if (chipEl) chipEl.classList.add('wrong');
+                if (flowerEl) flowerEl.classList.add('wrong');
+                setTimeout(() => {
+                    if (chipEl) chipEl.classList.remove('wrong');
+                    if (flowerEl) flowerEl.classList.remove('wrong');
+                    f.selected = false;
+                    s.selected = false;
+                    state.flowerSelected = null;
+                    renderFlower();
+                }, 500);
+                const status = document.getElementById('flowerStatus');
+                status.textContent = '❌ 配對唔啱，再試一次！';
+                status.className = 'flower-status error';
+                setTimeout(() => {
+                    if (state.flowerDone < FLOWERS.length) {
+                        status.textContent = '揀一朵花，再揀一個象徵';
+                        status.className = 'flower-status';
+                    }
+                }, 800);
+            }
+        }
+
+        document.getElementById('resetFlowerBtn').addEventListener('click', () => {
+            if (state.flowerDone === FLOWERS.length || confirm('重新配對會清除進度，確定嗎？')) {
+                initFlower();
+            }
+        });
+
+        // ================================================================
+        //  遊戲3：測驗
+        // ================================================================
+
+        function initQuiz() {
+            state.quizIndex = 0;
+            state.quizAnswers = QUIZ.map(() => -1);
+            renderQuiz();
+        }
+
+        function renderQuiz() {
+            const idx = state.quizIndex;
+            const total = QUIZ.length;
+            const data = QUIZ[idx];
+
+            document.getElementById('qNum').textContent = `${idx+1} / ${total}`;
+            document.getElementById('qBar').style.width = `${((idx+1)/total)*100}%`;
+
+            const answered = state.quizAnswers.filter(a => a !== -1).length;
+            document.getElementById('qScore').textContent = `${answered} 分`;
+
+            if (answered === total) {
+                document.getElementById('questionBox').style.display = 'none';
+                document.getElementById('quizComplete').style.display = 'block';
+                document.getElementById('finalMsg').textContent =
+                    `你獲得咗 ${answered}/${total} 分！${answered === total ? '🌟 完美滿分，你係愛蓮說大師！' : '繼續加油，再溫習一次吧！'}`;
+                document.getElementById('prevBtn').disabled = true;
+                document.getElementById('nextBtn').disabled = true;
+                updateTotalScore();
+                return;
+            }
+
+            document.getElementById('questionBox').style.display = 'block';
+            document.getElementById('quizComplete').style.display = 'none';
+
+            document.getElementById('qText').textContent = data.q;
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            const selected = state.quizAnswers[idx];
+
+            data.opts.forEach((opt, i) => {
+                const div = document.createElement('div');
+                div.className = 'opt';
+                if (selected !== -1) {
+                    div.classList.add('disabled');
+                    if (i === data.ans) div.classList.add('correct');
+                    if (selected === i && i !== data.ans) div.classList.add('wrong');
+                }
+                div.textContent = `${String.fromCharCode(65+i)}. ${opt}`;
+                div.dataset.idx = i;
+                if (selected === -1) {
+                    div.addEventListener('click', () => onQuizSelect(i));
+                }
+                container.appendChild(div);
+            });
+
+            const fb = document.getElementById('quizFeedback');
+            if (selected !== -1) {
+                const isCorrect = selected === data.ans;
+                fb.className = `quiz-feedback show ${isCorrect ? 'good' : 'bad'}`;
+                fb.textContent = isCorrect ?
+                    `✅ 正確！${data.explain}` :
+                    `❌ 唔正確。${data.explain}`;
+            } else {
+                fb.className = 'quiz-feedback';
+                fb.textContent = '';
+            }
+
+            document.getElementById('prevBtn').disabled = idx === 0;
+            document.getElementById('nextBtn').textContent = idx === total - 1 ? '🏁 完成' : '下一題 ➡';
+            document.getElementById('nextBtn').disabled = selected === -1;
+            updateTotalScore();
+        }
+
+        function onQuizSelect(idx) {
+            const current = state.quizIndex;
+            if (state.quizAnswers[current] !== -1) return;
+            state.quizAnswers[current] = idx;
+            renderQuiz();
+        }
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (state.quizIndex > 0) {
+                state.quizIndex--;
+                renderQuiz();
+            }
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            const total = QUIZ.length;
+            const answered = state.quizAnswers.filter(a => a !== -1).length;
+            if (answered === total) return;
+            if (state.quizIndex < total - 1) {
+                state.quizIndex++;
+                renderQuiz();
+            } else {
+                const allDone = state.quizAnswers.every(a => a !== -1);
+                if (!allDone) alert('請先回答當前題目！');
+            }
+        });
+
+        // ================================================================
+        //  頁籤切換
+        // ================================================================
+
+        document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const target = btn.dataset.tab;
+                document.querySelectorAll('.game-panel').forEach(p => p.classList.remove('active'));
+                document.getElementById(`panel${target.slice(-1)}`).classList.add('active');
+                if (target === 'game1') renderMatch();
+                else if (target === 'game2') renderFlower();
+                else if (target === 'game3') renderQuiz();
+            });
+        });
+
+        // ================================================================
+        //  啟動
+        // ================================================================
+
+        initMatch();
+        initFlower();
+        initQuiz();
+        updateTotalScore();
+
+        console.log('🪷 愛蓮說·互動學堂 (修正版) 已啟動！');
+        console.log('📚 配對遊戲 Bug 已修復，祝同學們學習愉快！');
+    </script>
+
+</body>
+</html>
